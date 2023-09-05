@@ -1,0 +1,60 @@
+// EmonLibrary examples openenergymonitor.org, Licence GNU GPL V3
+#include <LiquidCrystal_I2C.h>
+#include "EmonLib.h"                   // Include Emon Library
+int lcdColumns = 16;
+int lcdRows = 2;
+LiquidCrystal_I2C lcd(0x27, lcdColumns, lcdRows);  
+
+EnergyMonitor emon1;                   // Create an instance
+
+void setup() {  
+  Serial.begin(9600);
+  lcd.init();                     
+  lcd.backlight();
+  lcd.cursor_off();
+  lcd.clear();
+  lcd.setCursor(0,0);
+  lcd.print("AC Power Meter");
+  delay(1000);
+  emon1.voltage(35,366, 0);
+  emon1.current(34, 1.100999);            // Current: input pin, calibration.
+  lcd.clear();
+}
+
+void loop() {
+  lcd.print("Sequence: I+V,P");
+  emon1.calcVI(20, 2000); 
+  double Vrms = emon1.Vrms;
+  double Irms = emon1.calcIrms(2000);  // Calculate Irms only
+  float watt=(Irms*Vrms);
+  lcd.clear();
+  lcd.setCursor(0,0);
+  lcd.print("Vrms:");
+  lcd.setCursor(6,0);
+  lcd.print(Vrms);
+  lcd.setCursor(14,0);
+  lcd.print("V");
+  Serial.print(Vrms);
+  Serial.print(" V, ");
+	
+  lcd.setCursor(0,1);
+  lcd.print("Irms:");
+  lcd.setCursor(6,1);
+  lcd.print(Irms);
+  lcd.setCursor(11,1);
+  lcd.print("A");
+  Serial.print(Irms);
+  Serial.println(" A, ");
+  delay(1000);
+  lcd.clear();
+
+  lcd.setCursor(0,0);
+  lcd.print("Power:");
+  lcd.setCursor(8,0);
+  lcd.print(watt);
+  lcd.setCursor(15, 0);
+  lcd.print("W");
+  delay(1000);
+  lcd.clear();
+
+}
